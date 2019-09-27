@@ -37,15 +37,17 @@ class Register(object):
         for i in range(self.numMeasures):
             m = self.measure()
             if m in state_count:
-                state_count[m] += 1
+                state_count[m] += 1.0
             else:
-                state_count[m] = 1
+                state_count[m] = 1.0
+        for state in state_count.keys():
+            state_count[state] /= self.numMeasures
         return state_count
 
     def states_as_string(self):
         states = self.counting_states()
         return "[" + ", ".join(
-            state + ":" + str(states[state] * 100.0 / self.numMeasures) + "%" for state in sorted(states.keys())) + \
+            state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
                "]"
 
     def hadamard_gate(self, qubit):
@@ -72,3 +74,4 @@ class Register(object):
         for m in exec_sequence[1:]:
             gate = numpy.kron(gate, m)
         self.unit_vector = numpy.dot(gate, self.unit_vector)
+        self.unit_vector = self.unit_vector.tolist()
