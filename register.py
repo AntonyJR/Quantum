@@ -4,6 +4,8 @@ import random
 
 import numpy
 
+DEFAULT_QBITS = 3
+DEFAULT_MEASURES = 100
 ROOT2RECIPRICOL = 1 / math.sqrt(2)
 I = numpy.array([[1, 0],
                  [0, 1]])
@@ -12,11 +14,13 @@ H = ROOT2RECIPRICOL * numpy.array([[1, 1],
 
 
 class Register(object):
-    def __init__(self, num_qubits=3, num_measures=100):
+    def __init__(self, num_qubits=DEFAULT_QBITS, num_measures=DEFAULT_MEASURES):
         self.num_qubits = num_qubits  # number of qubits
         self.number_of_states = 2 ** self.num_qubits
         self.unit_vector = [0j] * self.number_of_states
         self.numMeasures = num_measures
+        self.J = numpy.identity(self.number_of_states)
+        self.J[0, 0] = -1.
 
     def vector_as_string(self):
         return "[" + ", ".join(
@@ -75,3 +79,50 @@ class Register(object):
             gate = numpy.kron(gate, m)
         self.unit_vector = numpy.dot(gate, self.unit_vector)
         self.unit_vector = self.unit_vector.tolist()
+
+    def j_gate(self):
+        self.unit_vector = numpy.dot(self.J, self.unit_vector)
+        self.unit_vector = self.unit_vector.tolist()
+
+    def oracle(self, desired_state):
+        oracle = numpy.identity(self.number_of_states)
+        oracle[desired_state, desired_state] = -1.
+        self.unit_vector = numpy.dot(oracle, self.unit_vector)
+        self.unit_vector = self.unit_vector.tolist()
+
+
+def execute(program):
+    """
+    :param program:
+        {
+          "num_qbits" : 3,
+          "num_measures" : 100,
+          "initial_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
+          "operations" : [
+            {"op" : 'H', "qbit" : 3},
+            {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+          ]
+        }
+    :return:
+        {
+          "final_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
+          "states" : { "00100":50.0, "00001":50.0}
+        }
+
+    """
+    num_qbits = program['num_qbits'] if 'num_qbits' in program else DEFAULT_QBITS
+    num_measures = program['num_measures'] if 'num_measures' in program else DEFAULT_MEASURES
+    register = Register(num_qbits, num_measures)
+    register.unit_vector = program['initial_vector']
+    if "operations" in program:
+        for operation in program['operations']:
+            if operation['op'] == 'H':
+                register.hadamard_gate(operation['qbit'])
+            elif operation['op'] == 'P':
+                register.phase_gate(operation['qbit'], operation['theta'])
+            else:
+                pass
+    retval = {}
+    retval["final_vector"] = register.unit_vector
+    retval["states"] = register.counting_states()
+    return retval

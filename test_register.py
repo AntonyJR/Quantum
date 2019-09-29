@@ -5,6 +5,7 @@ from unittest import main
 
 from register import ROOT2RECIPRICOL
 from register import Register
+from register import execute
 
 
 # Tests based on exercises in "Undergraduate computational physics projects on quantum computing" D. Candela
@@ -20,8 +21,8 @@ class TestRegister(TestCase):
         print("")
 
     def setUp(self):
-        self.num_measures = 10000
-        self.state_accuracy_percent = 0.1
+        self.num_measures = 100000
+        self.state_accuracy_percent = 0.05
 
     def make_state_string(self, state, num_qbits):
         return "|" + format(state, "0" + str(num_qbits) + "b") + ">"
@@ -154,6 +155,54 @@ class TestRegister(TestCase):
             self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
                                                         "Incorrect single Hadamard gate probability")
 
+    def test_execute_no_op(self):
+        # Test execute function correctly reads input
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [0, 1., 0, 0, 0, 0, 0, 0],
+            "operations": [
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect no op execute")
+
+    def test_execute_missing_operations(self):
+        # Test execute function handles missing operations
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [0, 1., 0, 0, 0, 0, 0, 0],
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect missing operations execute")
+
+    def test_execute_missing_measures(self):
+        # Test execute function handles missing num measures
+        request = {
+            "num_qbits": 3,
+            "initial_vector": [0, 1., 0, 0, 0, 0, 0, 0],
+            "operations": [
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect no op execute")
+
+    def test_execute_missing_qbits(self):
+        # Test execute function handles missing num qbits
+        request = {
+            "num_measures": self.num_measures,
+            "initial_vector": [0, 1., 0, 0, 0, 0, 0, 0],
+            "operations": [
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect no op execute")
+
     def test_hadamard_gate_all_qbits(self):
         # Programming project 2
 
@@ -163,15 +212,22 @@ class TestRegister(TestCase):
         # Knowing the state of qubit 1, for example, gives no information about the states of qubits 2 and 3
         # The result of the calculation should vary randomly between all eight possibilities, |000>; |001>; ...; |111>.
         num_qbits = 3
-        hadamard = Register(num_qubits=num_qbits, num_measures=self.num_measures)
-        hadamard.unit_vector[0] = 1.
-        for i in range(1, num_qbits + 1):
-            hadamard.hadamard_gate(i)
+        num_states = 2**num_qbits
+        request = {
+            "num_qbits": num_qbits,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'H', "qbit": 1},
+                {"op": 'H', "qbit": 2},
+                {"op": 'H', "qbit": 3}
+            ]
+        }
+        result = execute(request)
         expected_states = {}
-        for j in range(0, hadamard.number_of_states):
-            expected_states[self.make_state_string(j, num_qbits)] = 1 / hadamard.number_of_states
-        states = hadamard.counting_states()
-        self.assertReasonablyEqualDictionaryWrapper(states, expected_states, self.state_accuracy_percent,
+        for j in range(0, num_states):
+            expected_states[self.make_state_string(j, num_qbits)] = 1 / num_states
+        self.assertReasonablyEqualDictionaryWrapper(result["states"], expected_states, self.state_accuracy_percent,
                                                     "Incorrect Hadamard gate applied to each qubit probability")
 
     def test_hadamard_gate_H1_H1(self):
@@ -183,13 +239,17 @@ class TestRegister(TestCase):
         # it can also put two quantum amplitudes back together into one.
         # In this case, the second Hadamard undoes the effect of the first one,
         # so the result of the calculation should always be |000>.
-        num_qbits = 3
-        hadamard = Register(num_qubits=num_qbits, num_measures=self.num_measures)
-        hadamard.unit_vector[0] = 1.
-        hadamard.hadamard_gate(1)
-        hadamard.hadamard_gate(1)
-        states = hadamard.counting_states()
-        self.assertEqualDictionaryWrapper(states, {"|000>": 1.0},
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'H', "qbit": 1},
+                {"op": 'H', "qbit": 1}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
                                           "Incorrect 2 Hadamard gate same qubit probability")
 
     def test_phase_shift_H3_P3_H3(self):
@@ -201,15 +261,18 @@ class TestRegister(TestCase):
         # As in the previous case, the result of the calculation is perfectly definite,
         # but now the result is always j001i.
         # The net effect of the three gates has been to flip qubit 3 from |0> to |1>.
-        num_qbits = 3
-        theta = pi
-        phase_shift = Register(num_qubits=num_qbits, num_measures=self.num_measures)
-        phase_shift.unit_vector[0] = 1.
-        phase_shift.hadamard_gate(3)
-        phase_shift.phase_gate(3, theta)
-        phase_shift.hadamard_gate(3)
-        states = phase_shift.counting_states()
-        self.assertEqualDictionaryWrapper(states, {"|001>": 1.0},
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'H', "qbit": 3},
+                {"op": 'P', "qbit": 3, "theta": pi},
+                {"op": 'H', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
                                           "Phase shift between 2 Hadamard gate same qubit probability")
 
     def test_phase_shift_5_H3_P3_H3(self):
@@ -217,16 +280,22 @@ class TestRegister(TestCase):
 
         # Repeat previous test with 5 qubits
         # Phase Shift 5 QBits Theta = pi H3 P3 H3 Psi
-        num_qbits = 5
-
-        theta = pi
-        phase_shift = Register(num_qbits, self.num_measures)
-        phase_shift.unit_vector[0] = 1.
-        phase_shift.hadamard_gate(3)
-        phase_shift.phase_gate(3, theta)
-        phase_shift.hadamard_gate(3)
-        states = phase_shift.counting_states()
-        self.assertEqualDictionaryWrapper(states, {"|00100>": 1.0},
+        num_qbits = 5;
+        num_states = 2**num_qbits
+        initial = [0.0]*num_states
+        initial[0] = 1.0
+        request = {
+            "num_qbits": num_qbits,
+            "num_measures": self.num_measures,
+            "initial_vector": initial,
+            "operations": [
+                {"op": 'H', "qbit": 3},
+                {"op": 'P', "qbit": 3, "theta": pi},
+                {"op": 'H', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|00100>": 1.0},
                                           "Phase shift between 2 Hadamard gate same qubit in 5 qubits probability")
 
     def test_phase_shift_7_P3_H3(self):
@@ -234,17 +303,22 @@ class TestRegister(TestCase):
 
         # Repeat previous test with 7 qubits
         # Phase Shift 7 QBits Theta = pi P3 H3 Psi
-        num_qbits = 7
-
-        theta = pi
-        phase_shift = Register(num_qbits, self.num_measures)
-        phase_shift.unit_vector[0] = 1.
-        phase_shift.hadamard_gate(3)
-        phase_shift.phase_gate(3, theta)
-        states = phase_shift.counting_states()
-        self.assertReasonablyEqualDictionaryWrapper(states, {"|0000000>": .5, "|0010000>": .5},
-                                                    self.state_accuracy_percent,
-                                                    "Phase shift then Hadamard gate same qubit in 7 qubits probability")
+        num_qbits = 7;
+        num_states = 2**num_qbits
+        initial = [0.0]*num_states
+        initial[0] = 1.0
+        request = {
+            "num_qbits": num_qbits,
+            "num_measures": self.num_measures,
+            "initial_vector": initial,
+            "operations": [
+                {"op": 'H', "qbit": 3},
+                {"op": 'P', "qbit": 3, "theta": pi}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|0000000>": .5, "|0010000>": .5},
+                                          "Phase shift then Hadamard gate same qubit in 7 qubits probability")
 
     def test_phase_shift_3_pi2_P3_H3(self):
         # Programming project 2

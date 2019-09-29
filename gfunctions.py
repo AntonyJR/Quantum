@@ -3,7 +3,8 @@ from register import Register
 
 
 def quantum_http(request):
-    """HTTP Cloud Function.
+    """
+    HTTP Cloud Function.
         Args:
             request (flask.Request): The request object.
             <http://flask.pocoo.org/docs/1.0/api/#flask.Request>
