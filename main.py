@@ -35,4 +35,4 @@ def quantum_http(request):
     retval = {}
     if request_json:
         retval = execute(request_json)
-    return retval
+    return jsonify(retval)
