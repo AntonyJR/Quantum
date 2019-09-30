@@ -15,7 +15,8 @@ from register import execute
 # Published by the American Association of Physics Teachers
 
 class TestRegister(TestCase):
-    def print_result(self, register):
+    @staticmethod
+    def print_result(register):
         print("after  " + register.vector_as_string())
         print(register.states_as_string())
         print("")
@@ -24,10 +25,12 @@ class TestRegister(TestCase):
         self.num_measures = 100000
         self.state_accuracy_percent = 0.05
 
-    def make_state_string(self, state, num_qbits):
+    @staticmethod
+    def make_state_string(state, num_qbits):
         return "|" + format(state, "0" + str(num_qbits) + "b") + ">"
 
-    def error_string(self, found, expected, msg):
+    @staticmethod
+    def error_string(found, expected, msg):
         return msg + " expected " + str(expected) + " found " + str(found)
 
     def assertEqualWrapper(self, found, expected, msg):
@@ -203,36 +206,6 @@ class TestRegister(TestCase):
         self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
                                           "Incorrect no op execute")
 
-    def test_hadamard_gate_single(self):
-        # Programming project 2
-
-        # Test application of single Hadamard gate
-        #  A Hadamard gate is applied to qubit 2.
-        #  From Eq. (14), this puts qubit 2 in an equal superposition |0> and |1>.
-        #  Therefore, the result of the calculation should vary randomly between the two possibilities, |000> and |010>.
-        num_qbits = 3
-        test_vector = [
-            None,
-            [ROOT2RECIPRICOL, 0.0, 0.0, 0.0, ROOT2RECIPRICOL, 0.0, 0.0, 0.0],
-            [ROOT2RECIPRICOL, 0.0, ROOT2RECIPRICOL, 0.0, 0.0, 0.0, 0.0, 0.0],
-            [ROOT2RECIPRICOL, ROOT2RECIPRICOL, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        ]
-        test_states = [
-            None,
-            {"|000>": 0.5, "|100>": 0.5},
-            {"|000>": 0.5, "|010>": 0.5},
-            {"|000>": 0.5, "|001>": 0.5}
-        ]
-        for i in range(1, num_qbits + 1):
-            hadamard = Register(num_qubits=num_qbits, num_measures=self.num_measures)
-            hadamard.unit_vector[0] = 1.
-            hadamard.hadamard_gate(i)
-            states = hadamard.counting_states()
-            self.assertEqualWrapper(hadamard.unit_vector, test_vector[i],
-                                    "Incorrect unit vector after Hadamard " + str(i))
-            self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
-                                                        "Incorrect single Hadamard gate probability")
-
     def test_hadamard_gate_all_qbits(self):
         # Programming project 2
 
@@ -370,7 +343,7 @@ class TestRegister(TestCase):
 
         # Repeat previous test with 5 qubits
         # Phase Shift 5 QBits Theta = pi H3 P3 H3 Psi
-        num_qbits = 5;
+        num_qbits = 5
         num_states = 2 ** num_qbits
         initial = [0.0] * num_states
         initial[0] = 1.0
@@ -393,7 +366,7 @@ class TestRegister(TestCase):
 
         # Repeat previous test with 7 qubits
         # Phase Shift 7 QBits Theta = pi P3 H3 Psi
-        num_qbits = 7;
+        num_qbits = 7
         num_states = 2 ** num_qbits
         initial = [0.0] * num_states
         initial[0] = 1.0

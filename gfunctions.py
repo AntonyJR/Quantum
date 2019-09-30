@@ -1,5 +1,5 @@
 from flask import jsonify
-from register import Register
+from register import execute
 
 
 def quantum_http(request):
@@ -34,15 +34,5 @@ def quantum_http(request):
     request_json = request.get_json(silent=True)
     retval = {}
     if request_json:
-        register = Register(request_json['num_qbits'], request_json['num_measures'])
-        register.unit_vector = request_json['initial_vector']
-        for operation in request_json['operations']:
-            if operation['op'] == 'H':
-                register.hadamard_gate(operation['qbit'])
-            elif operation['op'] == 'P':
-                register.phase_gate(operation['qbit'], operation['theta'])
-            else:
-                pass
-        retval["final_vector"] = register.vector_as_string()
-        retval["states"] = register.counting_states()
-    return jsonify(retval)
+        retval = execute(request_json)
+    return retval

@@ -52,7 +52,7 @@ class Register(object):
         states = self.counting_states()
         return "[" + ", ".join(
             state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
-               "]"
+            "]"
 
     def hadamard_gate(self, qubit):
         """
@@ -116,9 +116,10 @@ def execute(program):
     register.unit_vector = program['initial_vector']
     if "operations" in program:
         execute_operations(program['operations'], register)
-    retval = {}
-    retval["final_vector"] = register.unit_vector
-    retval["states"] = register.counting_states()
+    retval = {
+        "final_vector": register.unit_vector,
+        "states": register.counting_states()
+    }
     return retval
 
 
