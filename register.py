@@ -115,14 +115,41 @@ def execute(program):
     register = Register(num_qbits, num_measures)
     register.unit_vector = program['initial_vector']
     if "operations" in program:
-        for operation in program['operations']:
-            if operation['op'] == 'H':
-                register.hadamard_gate(operation['qbit'])
-            elif operation['op'] == 'P':
-                register.phase_gate(operation['qbit'], operation['theta'])
-            else:
-                pass
+        execute_operations(program['operations'], register)
     retval = {}
     retval["final_vector"] = register.unit_vector
     retval["states"] = register.counting_states()
     return retval
+
+
+def execute_operations(operations, register):
+    """
+    Perform list of operations on register
+    :param operations:
+         [
+            {"op" : 'H', "qbit" : 3},
+            {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+            {
+                "op" : 'Repeat', "count" : 2, "operations" : [
+                    {"op" : 'H', "qbit" : 3}
+            ]
+          ]
+    :param register:
+        Quantum register
+        The state of this register will be updated by the operations
+    :return:
+        {
+          "final_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
+          "states" : { "00100":50.0, "00001":50.0}
+        }
+    """
+    for operation in operations:
+        if operation['op'] == 'H':
+            register.hadamard_gate(operation['qbit'])
+        elif operation['op'] == 'P':
+            register.phase_gate(operation['qbit'], operation['theta'])
+        elif operation['op'] == 'Repeat':
+            for i in range(operation['count']):
+                execute_operations(operation['operations'], register)
+        else:
+            pass
