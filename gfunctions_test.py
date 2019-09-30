@@ -3,7 +3,7 @@ from unittest.mock import Mock
 from unittest import main
 from test_register import TestRegister
 
-import gfunctions
+from main import quantum_http
 
 class TestQuantumHTTP(TestRegister):
     def test_quantum_http(self):
@@ -20,7 +20,7 @@ class TestQuantumHTTP(TestRegister):
         req = Mock()
         req.get_json = Mock(return_value = data)
         req.headers = {'content-type' : 'application/json'}
-        res = gfunctions.quantum_http(req)
+        res = quantum_http(req)
         self.assertEqualDictionaryWrapper(res["states"], {"|001>": 1.0},
                                           "Phase shift between 2 Hadamard gate same qubit probability")
 
