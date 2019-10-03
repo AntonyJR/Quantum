@@ -5,19 +5,22 @@ The original code was written by my son James Hurford-Reynolds.
 I have refactored his code to make it easier to reuse.
 
 ## Explanation of Project
+
 The following modules are part of the project:
 
-|**Module**|**Purpose**|
-|-------:|:----------|
-|[register]|Implementation of Qubits as a quantum register and quantum gates and oeprators.
-|[test_register]|Pyunit tests for register.|
-|[main]|Google serverless function to run quantum program.|
+|**Module**|**Purpose**|**Dependency**|
+|---------:|:----------|:-------------|
+|[register]|Implementation of Qubits as a quantum register and quantum gates and oeprators.|numpy 1.16.5|
+|[test_register]|Pyunit tests for register.|numpy 1.16.5|
+|[main]|Google serverless function to run quantum program.|flask 1.0.2|
 
 ## Quantum Program Format
+
 The *execute* function in the [register] module and the quantum_http function in the [main] module
 both have the same interface of receivng a JSON program description and returning a JSON response.
 
 ### Request Format ###
+
 The input json document has the following format
 ```json
 {

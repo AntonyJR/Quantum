@@ -192,7 +192,7 @@ class TestRegister(TestCase):
         }
         result = execute(request)
         self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
-                                          "Incorrect no op execute")
+                                          "Incorrect missing measures execute")
 
     def test_execute_missing_qbits(self):
         # Test execute function handles missing num qbits
@@ -204,7 +204,7 @@ class TestRegister(TestCase):
         }
         result = execute(request)
         self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
-                                          "Incorrect no op execute")
+                                          "Incorrect missing num qbits execute")
 
     def test_hadamard_gate_all_qbits(self):
         # Programming project 2

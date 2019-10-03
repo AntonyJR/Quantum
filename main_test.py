@@ -7,6 +7,7 @@ from main import quantum_http
 
 class TestQuantumHTTP(TestRegister):
     def test_quantum_http(self):
+
         data = {
                     "num_qbits": 3,
                     "num_measures": 10000,
