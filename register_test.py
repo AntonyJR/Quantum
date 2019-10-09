@@ -158,6 +158,81 @@ class TestRegister(TestCase):
             self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
                                                         "Incorrect single Hadamard gate probability")
 
+    def test_pauli_x_gate_single(self):
+        # Test application of single Pauli X (NOT) gate
+        num_qbits = 3
+        test_vector = [
+            None,
+            [0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ]
+        test_states = [
+            None,
+            {"|100>": 1.0},
+            {"|010>": 1.0},
+            {"|001>": 1.0}
+        ]
+        for i in range(1, num_qbits + 1):
+            paulix = Register(num_qubits=num_qbits, num_measures=self.num_measures)
+            paulix.unit_vector[0] = 1.
+            paulix.pauli_x_gate(i)
+            states = paulix.counting_states()
+            self.assertEqualWrapper(paulix.unit_vector, test_vector[i],
+                                    "Incorrect unit vector after Pauli X " + str(i))
+            self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
+                                                        "Incorrect single Pauli X gate probability")
+    def test_pauli_y_gate_single(self):
+        # Test application of single Pauli X (NOT) gate
+        num_qbits = 3
+        test_vector = [
+            None,
+            [0.0, 0.0, 0.0, 0.0, complex(0.0, 1.0), 0.0, 0.0, 0.0],
+            [0.0, 0.0, complex(0.0, 1.0), 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, complex(0.0, 1.0), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ]
+        test_states = [
+            None,
+            {"|100>": 1.0},
+            {"|010>": 1.0},
+            {"|001>": 1.0}
+        ]
+        for i in range(1, num_qbits + 1):
+            pauliy = Register(num_qubits=num_qbits, num_measures=self.num_measures)
+            pauliy.unit_vector[0] = 1.
+            pauliy.pauli_y_gate(i)
+            states = pauliy.counting_states()
+            self.assertEqualWrapper(pauliy.unit_vector, test_vector[i],
+                                    "Incorrect unit vector after Pauli Y " + str(i))
+            self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
+                                                        "Incorrect single Pauli X gate probability")
+    def test_pauli_z_gate_single(self):
+        # Test application of single Pauli X (NOT) gate
+        num_qbits = 3
+        test_vector = [
+            None,
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        ]
+        test_states = [
+            None,
+            {"|001>": 1.0},
+            {"|001>": 1.0},
+            {"|001>": 1.0}
+        ]
+        for i in range(1, num_qbits + 1):
+            pauliz = Register(num_qubits=num_qbits, num_measures=self.num_measures)
+            pauliz.unit_vector[1] = 1.
+            pauliz.pauli_z_gate(i)
+            states = pauliz.counting_states()
+            self.assertEqualWrapper(pauliz.unit_vector, test_vector[i],
+                                    "Incorrect unit vector after Pauli X " + str(i))
+            self.assertReasonablyEqualDictionaryWrapper(states, test_states[i], self.state_accuracy_percent,
+                                                        "Incorrect single Pauli X gate probability")
+
+
+
     def test_execute_no_op(self):
         # Test execute function correctly reads input
         request = {
@@ -314,6 +389,136 @@ class TestRegister(TestCase):
         result = execute(request)
         self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
                                           "Incorrect 2 Hadamard gate same qubit probability")
+
+    def test_pauli_x_gate_X3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'X', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect X gate qubit probability")
+
+    def test_pauli_x_gate_X3_X3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {
+                    "op": 'Repeat', "count": 2,
+                    "operations": [
+                        {"op": 'X', "qbit": 3}
+                    ]
+                }
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
+                                          "Incorrect X gate qubit probability")
+
+    def test_pauli_y_gate_Y3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'Y', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect Y gate qubit probability")
+        self.assertEqualWrapper(result["final_vector"], [0.0, complex(0.0, 1.0), 0.0, 0.0, 0.0, 0.0, 0.0 ,0.0],
+                                          "Incorrect Y vector")
+
+    def test_pauli_x_gate_Y3_Y3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {
+                    "op": 'Repeat', "count": 2,
+                    "operations": [
+                        {"op": 'Y', "qbit": 3}
+                    ]
+                }
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
+                                          "Incorrect Y gate qubit probability")
+
+    def test_pauli_z_gate_Z3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'Z', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
+                                          "Incorrect Z gate qubit probability")
+        self.assertEqualWrapper(result["final_vector"], [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,0.0],
+                                          "Incorrect Z vector")
+
+    def test_pauli_z_gate_Z3_Set(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [0.0, 1.0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'Z', "qbit": 3}
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect Z gate qubit probability")
+        self.assertEqualWrapper(result["final_vector"], [0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0 ,0.0],
+                                          "Incorrect Z vector")
+
+    def test_pauli_z_gate_Z3_Z3(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {
+                    "op": 'Repeat', "count": 2,
+                    "operations": [
+                        {"op": 'Z', "qbit": 3}
+                    ]
+                }
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|000>": 1.0},
+                                          "Incorrect Z gate qubit probability")
+
+    def test_pauli_z_gate_Z3_Z3_set(self):
+        request = {
+            "num_qbits": 3,
+            "num_measures": self.num_measures,
+            "initial_vector": [0.0, 1.0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {
+                    "op": 'Repeat', "count": 2,
+                    "operations": [
+                        {"op": 'Z', "qbit": 3}
+                    ]
+                }
+            ]
+        }
+        result = execute(request)
+        self.assertEqualDictionaryWrapper(result["states"], {"|001>": 1.0},
+                                          "Incorrect Z gate qubit probability")
 
     def test_phase_shift_H3_P3_H3(self):
         # Programming project 2

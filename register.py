@@ -11,6 +11,12 @@ I = numpy.array([[1, 0],
                  [0, 1]])
 H = ROOT2RECIPRICOL * numpy.array([[1, 1],
                                    [1, -1]])
+X = numpy.array([[0, 1],
+                 [1, 0]])
+Y = numpy.array([[0, complex(0, -1)],
+                 [complex(0, 1), 0]])
+Z = numpy.array([[1, 0],
+                 [0, -1]])
 
 
 class Register(object):
@@ -52,24 +58,45 @@ class Register(object):
         states = self.counting_states()
         return "[" + ", ".join(
             state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
-            "]"
+               "]"
 
     def hadamard_gate(self, qubit):
         """
-        :param qubit:stART AT 1
+        :param qubit:start AT 1
         :return:
         """
         self.gate_function(qubit, H)
 
     def phase_gate(self, qubit, theta):
         """
-        :param qubit:stART AT 1
+        :param qubit:start AT 1
         :param theta: user defines theta in radians
         :return:
         """
         R = numpy.array([[1, 0],
                          [0, cmath.exp(1j * complex(theta))]])
         self.gate_function(qubit, R)
+
+    def pauli_x_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, X)
+
+    def pauli_y_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, Y)
+
+    def pauli_z_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, Z)
 
     def gate_function(self, qubit, T):
         exec_sequence = [I] * self.num_qubits
@@ -147,6 +174,12 @@ def execute_operations(operations, register):
     for operation in operations:
         if operation['op'] == 'H':
             register.hadamard_gate(operation['qbit'])
+        elif operation['op'] == 'X':
+            register.pauli_x_gate(operation['qbit'])
+        elif operation['op'] == 'Y':
+            register.pauli_y_gate(operation['qbit'])
+        elif operation['op'] == 'Z':
+            register.pauli_z_gate(operation['qbit'])
         elif operation['op'] == 'P':
             register.phase_gate(operation['qbit'], operation['theta'])
         elif operation['op'] == 'Repeat':
