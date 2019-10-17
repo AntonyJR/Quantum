@@ -1,3 +1,4 @@
+from math import ceil
 from math import pi
 from math import sqrt
 from unittest import TestCase
@@ -48,7 +49,6 @@ class TestRegister(TestCase):
                                  self.error_string(found, expected, msg))
 
     def assertReasonablyEqualSequenceWrapper(self, found, expected, percent, msg):
-        self.assertEqualWrapper(len(found), len(expected), msg + " length")
         for i in range(len(found)):
             self.assertReasonablyEqualWrapper(found[i], expected[i], percent, msg + " value")
 
@@ -61,7 +61,6 @@ class TestRegister(TestCase):
                 self.assertEqualWrapper(found[key], expected[key], msg + " value")
 
     def assertReasonablyEqualDictionaryWrapper(self, found, expected, percent, msg):
-        self.assertEqualWrapper(len(found), len(expected), msg + " length")
         fkeys = found.keys()
         for key in expected.keys():
             self.assertTrue(key in fkeys, self.error_string(None, key, msg + " missing key"))
@@ -397,6 +396,37 @@ class TestRegister(TestCase):
         states = phase_shift.counting_states()
         self.assertEqualDictionaryWrapper(states, {"|001>": 1.},
                                           "Phase shift half pi then Hadamard gate same qubit in 3 qubits probability")
+
+    def test_grover_3(self):
+        # Grover algorithm
+
+        num_qbits = 3
+        num_iterations = ceil(sqrt(2 ** num_qbits))
+        request = {
+            "num_qbits": num_qbits,
+            "num_measures": self.num_measures,
+            "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
+            "operations": [
+                {"op": 'H', "qbit": 1},
+                {"op": 'H', "qbit": 2},
+                {"op": 'H', "qbit": 3},
+                {"op": 'Repeat', "count": num_iterations, "operations": [
+                    {"op": 'O', "desired_state": 6},
+                    {"op": 'H', "qbit": 1},
+                    {"op": 'H', "qbit": 2},
+                    {"op": 'H', "qbit": 3},
+                    {"op": 'J'},
+                    {"op": 'H', "qbit": 1},
+                    {"op": 'H', "qbit": 2},
+                    {"op": 'H', "qbit": 3}
+
+                ]}
+            ]
+        }
+        result = execute(request)
+        print(result)
+        self.assertReasonablyEqualDictionaryWrapper(result["states"], {"|110>": 1.0},
+                                                    0.95, "Grover algorithm")
 
 
 if __name__ == '__main__':

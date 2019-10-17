@@ -52,7 +52,7 @@ class Register(object):
         states = self.counting_states()
         return "[" + ", ".join(
             state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
-            "]"
+               "]"
 
     def hadamard_gate(self, qubit):
         """
@@ -85,10 +85,52 @@ class Register(object):
         self.unit_vector = self.unit_vector.tolist()
 
     def oracle(self, desired_state):
-        oracle = numpy.identity(self.number_of_states)
-        oracle[desired_state, desired_state] = -1.
-        self.unit_vector = numpy.dot(oracle, self.unit_vector)
+        o = numpy.identity(self.number_of_states)
+        o[desired_state, desired_state] = -1.
+        self.unit_vector = numpy.dot(o, self.unit_vector)
         self.unit_vector = self.unit_vector.tolist()
+
+    def execute_operations(self, operations):
+        """
+        Perform list of operations on register
+        :param operations:
+             [
+                {"op" : 'H', "qbit" : 3},
+                {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+                {
+                    "op" : 'Repeat', "count" : 2, "operations" : [
+                        {"op" : 'H', "qbit" : 3}
+                ]
+              ]
+        :param register:
+            Quantum register
+            The state of this register will be updated by the operations
+        :return:
+            {
+              "final_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
+              "states" : { "00100":50.0, "00001":50.0}
+            }
+        """
+        for operation in operations:
+            if operation['op'] == 'H':
+                self.hadamard_gate(operation['qbit'])
+            elif operation['op'] == 'P':
+                self.phase_gate(operation['qbit'], operation['theta'])
+            elif operation['op'] == 'O':
+                self.oracle(operation['desired_state'])
+            elif operation['op'] == 'J':
+                self.j_gate()
+            elif operation['op'] == 'Repeat':
+                for i in range(operation['count']):
+                    self.execute_operations(operation['operations'])
+            else:
+                pass
+
+    op_table = {
+        'H': (hadamard_gate, 'qbit'),
+        'P': (phase_gate, 'qbit', 'theta'),
+        'R': (execute_operations, 'operations')
+    }
 
 
 def execute(program):
@@ -115,42 +157,9 @@ def execute(program):
     register = Register(num_qbits, num_measures)
     register.unit_vector = program['initial_vector']
     if "operations" in program:
-        execute_operations(program['operations'], register)
+        register.execute_operations(program['operations'])
     retval = {
         "final_vector": register.unit_vector,
         "states": register.counting_states()
     }
     return retval
-
-
-def execute_operations(operations, register):
-    """
-    Perform list of operations on register
-    :param operations:
-         [
-            {"op" : 'H', "qbit" : 3},
-            {"op" : 'P', "qbit" : 3, "theta" : 0.0}
-            {
-                "op" : 'Repeat', "count" : 2, "operations" : [
-                    {"op" : 'H', "qbit" : 3}
-            ]
-          ]
-    :param register:
-        Quantum register
-        The state of this register will be updated by the operations
-    :return:
-        {
-          "final_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
-          "states" : { "00100":50.0, "00001":50.0}
-        }
-    """
-    for operation in operations:
-        if operation['op'] == 'H':
-            register.hadamard_gate(operation['qbit'])
-        elif operation['op'] == 'P':
-            register.phase_gate(operation['qbit'], operation['theta'])
-        elif operation['op'] == 'Repeat':
-            for i in range(operation['count']):
-                execute_operations(operation['operations'], register)
-        else:
-            pass
