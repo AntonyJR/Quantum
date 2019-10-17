@@ -1,6 +1,7 @@
 import cmath
 import math
 import random
+import copy
 
 import numpy
 
@@ -20,9 +21,9 @@ Z = numpy.array([[1, 0],
 
 
 class Register(object):
-    def __init__(self, num_qubits=DEFAULT_QBITS, num_measures=DEFAULT_MEASURES):
-        self.num_qubits = num_qubits  # number of qubits
-        self.number_of_states = 2 ** self.num_qubits
+    def __init__(self, num_qbits=DEFAULT_QBITS, num_measures=DEFAULT_MEASURES):
+        self.num_qbits = num_qbits  # number of qbits
+        self.number_of_states = 2 ** self.num_qbits
         self.unit_vector = [0j] * self.number_of_states
         self.numMeasures = num_measures
         self.J = numpy.identity(self.number_of_states)
@@ -40,7 +41,7 @@ class Register(object):
             q += (self.unit_vector[i].conjugate() * self.unit_vector[i]).real
             if measure < q:
                 break
-        return "|" + format(i, "0" + str(self.num_qubits) + "b") + ">"
+        return "|" + format(i, "0" + str(self.num_qbits) + "b") + ">"
 
     def counting_states(self):
         state_count = {}
@@ -60,47 +61,47 @@ class Register(object):
             state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
                "]"
 
-    def hadamard_gate(self, qubit):
+    def hadamard_gate(self, qbit):
         """
-        :param qubit:start AT 1
+        :param qbit:start AT 1
         :return:
         """
-        self.gate_function(qubit, H)
+        self.gate_function(qbit, H)
 
-    def phase_gate(self, qubit, theta):
+    def phase_gate(self, qbit, theta):
         """
-        :param qubit:start AT 1
+        :param qbit:start AT 1
         :param theta: user defines theta in radians
         :return:
         """
         R = numpy.array([[1, 0],
                          [0, cmath.exp(1j * complex(theta))]])
-        self.gate_function(qubit, R)
+        self.gate_function(qbit, R)
 
-    def pauli_x_gate(self, qubit):
+    def pauli_x_gate(self, qbit):
         """
-        :param qubit:start AT 1
+        :param qbit:start AT 1
         :return:
         """
-        self.gate_function(qubit, X)
+        self.gate_function(qbit, X)
 
-    def pauli_y_gate(self, qubit):
+    def pauli_y_gate(self, qbit):
         """
-        :param qubit:start AT 1
+        :param qbit:start AT 1
         :return:
         """
-        self.gate_function(qubit, Y)
+        self.gate_function(qbit, Y)
 
-    def pauli_z_gate(self, qubit):
+    def pauli_z_gate(self, qbit):
         """
-        :param qubit:start AT 1
+        :param qbit:start AT 1
         :return:
         """
-        self.gate_function(qubit, Z)
+        self.gate_function(qbit, Z)
 
-    def gate_function(self, qubit, T):
-        exec_sequence = [I] * self.num_qubits
-        exec_sequence[qubit - 1] = T
+    def gate_function(self, qbit, T):
+        exec_sequence = [I] * self.num_qbits
+        exec_sequence[qbit - 1] = T
         gate = exec_sequence[0]
         for m in exec_sequence[1:]:
             gate = numpy.kron(gate, m)
@@ -117,17 +118,21 @@ class Register(object):
         self.unit_vector = numpy.dot(o, self.unit_vector)
         self.unit_vector = self.unit_vector.tolist()
 
+    def repeat(self, count, operations):
+        for i in range(count):
+            self.execute_operations(operations)
+
     def execute_operations(self, operations):
         """
         Perform list of operations on register
         :param operations:
              [
-                {"op" : 'H', "qbit" : 3},
-                {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+                {"op" : 'H', "args" : {"qbit" : 3}},
+                {"op" : 'P', "args" : {"qbit" : 3, "theta" : 0.0}}
                 {
-                    "op" : 'Repeat', "count" : 2, "operations" : [
-                        {"op" : 'H', "qbit" : 3}
-                ]
+                    "op" : 'Repeat', "args" : {"count" : 2, "operations" : [
+                        {"op" : 'H', "args" : {"qbit" : 3}}
+                ]}
               ]
         :param register:
             Quantum register
@@ -139,30 +144,22 @@ class Register(object):
             }
         """
         for operation in operations:
-            if operation['op'] == 'H':
-                self.hadamard_gate(operation['qbit'])
-            elif operation['op'] == 'P':
-                self.phase_gate(operation['qbit'], operation['theta'])
-            elif operation['op'] == 'O':
-                self.oracle(operation['desired_state'])
-            elif operation['op'] == 'J':
-                self.j_gate()
-            elif operation['op'] == 'X':
-                self.pauli_x_gate(operation['qbit'])
-            elif operation['op'] == 'Y':
-                self.pauli_y_gate(operation['qbit'])
-            elif operation['op'] == 'Z':
-                self.pauli_z_gate(operation['qbit'])
-            elif operation['op'] == 'Repeat':
-                for i in range(operation['count']):
-                    self.execute_operations(operation['operations'])
+            op = self.op_table[operation['op']]
+            if 'args' in operation:
+                args = operation['args']
             else:
-                pass
+                args = {}
+            op(self, **args)
 
     op_table = {
-        'H': (hadamard_gate, 'qbit'),
-        'P': (phase_gate, 'qbit', 'theta'),
-        'R': (execute_operations, 'operations')
+        'H': hadamard_gate,
+        'P': phase_gate,
+        'X': pauli_x_gate,
+        'Y': pauli_y_gate,
+        'Z': pauli_z_gate,
+        'O': oracle,
+        'J': j_gate,
+        'Repeat': repeat
     }
 
 
@@ -174,8 +171,10 @@ def execute(program):
           "num_measures" : 100,
           "initial_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
           "operations" : [
-            {"op" : 'H', "qbit" : 3},
-            {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+            {"op" : 'H',
+             "args" : {"qbit" : 3}},
+            {"op" : 'P',
+             "args": {"qbit" : 3, "theta" : 0.0}}
           ]
         }
     :return:

@@ -11,8 +11,10 @@ The following modules are part of the project:
 |**Module**|**Purpose**|**Dependency**|
 |---------:|:----------|:-------------|
 |[register]|Implementation of Qubits as a quantum register and quantum gates and oeprators.|numpy 1.16.5|
-|[test_register]|Pyunit tests for register.|numpy 1.16.5|
 |[main]|Google serverless function to run quantum program.|flask 1.0.2|
+|[test_register]|Pyunit tests for register.|numpy 1.16.5|
+|[test_main]|Pyunit tests for main.|flask 1.0.2|
+|[mock_extension]|Extensions to Mock to support percentage based error checking.||
 
 ## Quantum Program Format
 
@@ -28,12 +30,12 @@ The input json document has the following format
   "num_measures" : 100,
   "initial_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
   "operations" : [
-    { "op" : 'H', "qbit" : 3},
-    { "op" : 'P', "qbit" : 3, "theta" : 0.0},
-    { "op" : 'Repeat', "count" : 2,
+    { "op" : 'H', "args" : {"qbit" : 3}},
+    { "op" : 'P', "args" : {"qbit" : 3, "theta" : 0.0}},
+    { "op" : 'Repeat', "args" : {"count" : 2,
       "operations" : [
-        {"op" : 'H', "qbit" : 1}
-      ]
+        {"op" : 'H', "args" : {"qbit" : 1}}
+      ]}
     }
   ]
 }
@@ -62,7 +64,6 @@ The input json document has the following format
     * **op** *J*
   * Apply oracle
     * **op** *O*
-    * **qbit** Qubit to apply to
     * **desired_State** Desired state to find
   * Repeat operations
     * **op** *Repeat*

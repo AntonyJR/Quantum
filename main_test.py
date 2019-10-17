@@ -1,22 +1,30 @@
 from math import pi
-from unittest import main
-from unittest.mock import Mock
+from unittest import main, TestCase
+from unittest.mock import Mock, patch
+from mock_extension import MockExtension
 
-from test_register import TestRegister
+from register_test import TestRegister
 
 from main import quantum_http
 
 
-class TestQuantumHTTP(TestRegister):
-    def test_quantum_http(self):
+def side_effect(json):
+    return json
+
+
+class TestQuantumHTTP(MockExtension):
+
+
+    @patch('main.jsonify', side_effect=side_effect)
+    def test_quantum_http(self, mock_jsonify):
         data = {
             "num_qbits": 3,
             "num_measures": 10000,
             "initial_vector": [1.0, 0, 0, 0, 0, 0, 0, 0],
             "operations": [
-                {"op": 'H', "qbit": 3},
-                {"op": 'P', "qbit": 3, "theta": pi},
-                {"op": 'H', "qbit": 3}
+                {"op": 'H', "args" : {"qbit": 3}},
+                {"op": 'P', "args" : {"qbit": 3, "theta": pi}},
+                {"op": 'H', "args" : {"qbit": 3}}
             ]
         }
         req = Mock()
