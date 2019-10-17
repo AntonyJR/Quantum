@@ -629,7 +629,6 @@ class TestRegister(TestCase):
             ]
         }
         result = execute(request)
-        print(result)
         self.assertReasonablyEqualDictionaryWrapper(result["states"], {"|110>": 1.0},
                                                     0.95, "Grover algorithm")
 

@@ -49,6 +49,21 @@ The input json document has the following format
     * **op** *P*
     * **qbit** Qubit to apply to
     * **theta** Phase shift in radians
+  * Apply Pauli X gate
+    * **op** *X*
+    * **qbit** Qubit to apply to
+  * Apply Pauli Y gate
+    * **op** *Y*
+    * **qbit** Qubit to apply to
+  * Apply Pauli Z gate
+    * **op** *Z*
+    * **qbit** Qubit to apply to
+  * Apply J gate
+    * **op** *J*
+  * Apply oracle
+    * **op** *O*
+    * **qbit** Qubit to apply to
+    * **desired_State** Desired state to find
   * Repeat operations
     * **op** *Repeat*
     * **count** Number of times to repeat operations
