@@ -11,6 +11,12 @@ I = numpy.array([[1, 0],
                  [0, 1]])
 H = ROOT2RECIPRICOL * numpy.array([[1, 1],
                                    [1, -1]])
+X = numpy.array([[0, 1],
+                 [1, 0]])
+Y = numpy.array([[0, complex(0, -1)],
+                 [complex(0, 1), 0]])
+Z = numpy.array([[1, 0],
+                 [0, -1]])
 
 
 class Register(object):
@@ -56,20 +62,41 @@ class Register(object):
 
     def hadamard_gate(self, qubit):
         """
-        :param qubit:stART AT 1
+        :param qubit:start AT 1
         :return:
         """
         self.gate_function(qubit, H)
 
     def phase_gate(self, qubit, theta):
         """
-        :param qubit:stART AT 1
+        :param qubit:start AT 1
         :param theta: user defines theta in radians
         :return:
         """
         R = numpy.array([[1, 0],
                          [0, cmath.exp(1j * complex(theta))]])
         self.gate_function(qubit, R)
+
+    def pauli_x_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, X)
+
+    def pauli_y_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, Y)
+
+    def pauli_z_gate(self, qubit):
+        """
+        :param qubit:start AT 1
+        :return:
+        """
+        self.gate_function(qubit, Z)
 
     def gate_function(self, qubit, T):
         exec_sequence = [I] * self.num_qubits
@@ -163,3 +190,36 @@ def execute(program):
         "states": register.counting_states()
     }
     return retval
+
+
+def execute_operations(operations, register):
+    """
+    Perform list of operations on register
+    :param operations:
+         [
+            {"op" : 'H', "qbit" : 3},
+            {"op" : 'P', "qbit" : 3, "theta" : 0.0}
+            {
+                "op" : 'Repeat', "count" : 2, "operations" : [
+                    {"op" : 'H', "qbit" : 3}
+            ]
+          ]
+    :param register:
+        Quantum register
+        The state of this register will be updated by the operations
+    :return:
+        {
+          "final_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
+          "states" : { "00100":50.0, "00001":50.0}
+        }
+    """
+    for operation in operations:
+        if operation['op'] == 'H':
+            register.hadamard_gate(operation['qbit'])
+        elif operation['op'] == 'P':
+            register.phase_gate(operation['qbit'], operation['theta'])
+        elif operation['op'] == 'Repeat':
+            for i in range(operation['count']):
+                execute_operations(operation['operations'], register)
+        else:
+            pass
