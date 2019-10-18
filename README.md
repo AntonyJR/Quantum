@@ -14,7 +14,7 @@ The following modules are part of the project:
 |[main]|Google serverless function to run quantum program.|flask 1.0.2|
 |[test_register]|Pyunit tests for register.|numpy 1.16.5|
 |[main_test]|Pyunit tests for main.|flask 1.0.2|
-|[mock_extension]|Extensions to Mock to support percentage based error checking.||
+|[mock_extension]|Extensions to Mock to support percentage based error checking.|flask 1.0.2|
 
 ## Quantum Program Format
 
