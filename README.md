@@ -30,11 +30,11 @@ The input json document has the following format
   "num_measures" : 100,
   "initial_vector" : [1.0, 0, 0, 0, 0, 0, 0, 0],
   "operations" : [
-    { "op" : 'H', "args" : {"qbit" : 3}},
-    { "op" : 'P', "args" : {"qbit" : 3, "theta" : 0.0}},
-    { "op" : 'Repeat', "args" : {"count" : 2,
+    { "op" : "H", "args" : {"qbit" : 3}},
+    { "op" : "P", "args" : {"qbit" : 3, "theta" : 0.0}},
+    { "op" : "Repeat", "args" : {"count" : 2,
       "operations" : [
-        {"op" : 'H', "args" : {"qbit" : 1}}
+        {"op" : "H", "args" : {"qbit" : 1}}
       ]}
     }
   ]
