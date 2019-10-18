@@ -2,7 +2,9 @@
 
 This is a Python implementation of the exercises suggested in the paper [Undergraduate computational physics projects on quantum computing][Candela1] (Can1)
 The original code was written by my son James Hurford-Reynolds.
-I have refactored his code to make it easier to reuse.
+I have refactored his code to make it easier to reuse and added addtional gates beyond his original project.
+The code supports a simple quantum gate arrangement language in json with provision for repeating sets of gates.
+ 
 
 ## Explanation of Project
 
