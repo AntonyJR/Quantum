@@ -105,6 +105,7 @@ class Register(object):
         gate = exec_sequence[0]
         for m in exec_sequence[1:]:
             gate = numpy.kron(gate, m)
+
         self.unit_vector = numpy.dot(gate, self.unit_vector)
         self.unit_vector = self.unit_vector.tolist()
 

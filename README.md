@@ -14,7 +14,7 @@ The following modules are part of the project:
 |---------:|:----------|:-------------|
 |[register]|Implementation of Qubits as a quantum register and quantum gates and oeprators.|numpy 1.16.5|
 |[main]|Google serverless function to run quantum program.|flask 1.0.2|
-|[test_register]|Pyunit tests for register.|numpy 1.16.5|
+|[register_test]|Pyunit tests for register.|numpy 1.16.5|
 |[main_test]|Pyunit tests for main.|flask 1.0.2|
 |[mock_extension]|Extensions to Mock to support percentage based error checking.|flask 1.0.2|
 
@@ -88,7 +88,7 @@ American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
 
 [Candela1]: https://doi.org/10.1119/1.4922296
 [register]: register.py
-[test_register]: test_register.py
+[register_test]: register_test.py
 [main]: main.py
 [mock_extension]: mock_extension.py
 [main_test]: main_test.py
