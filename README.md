@@ -4,6 +4,7 @@ This is a Python implementation of the exercises suggested in the paper [Undergr
 The original code was written by my son James Hurford-Reynolds.
 I have refactored his code to make it easier to reuse and added addtional gates beyond his original project.
 The code supports a simple quantum gate arrangement language in json with provision for repeating sets of gates.
+For a more extensive and powerful implementation of quantum circuits then check out [QuTiP]
  
 
 ## Explanation of Project
@@ -83,6 +84,11 @@ The output json document has the following format
 * **final_vector** out register values
 * **states** result of sampling output vector
 
+## To Do
+* Add support for controlled gate (single qubit control)
+* Refactor to support pre-calculating quantum gate tensor for optimisation of repeated use of same circuit 
+
+## References
 Can1: [Undergraduate computational physics projects on quantum computing][Candela1] : D. Candela :
 American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
 
@@ -92,3 +98,4 @@ American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
 [main]: main.py
 [mock_extension]: mock_extension.py
 [main_test]: main_test.py
+[QuTiP]: http://qutip.org/

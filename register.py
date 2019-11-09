@@ -8,16 +8,17 @@ import numpy
 DEFAULT_QBITS = 3
 DEFAULT_MEASURES = 100
 ROOT2RECIPRICOL = 1 / math.sqrt(2)
-I = numpy.array([[1, 0],
-                 [0, 1]])
+I = numpy.identity(2, complex)
+empty = numpy.zeros((2, 2), complex)
 H = ROOT2RECIPRICOL * numpy.array([[1, 1],
-                                   [1, -1]])
+                                   [1, -1]], complex)
 X = numpy.array([[0, 1],
-                 [1, 0]])
+                 [1, 0]], complex)
 Y = numpy.array([[0, complex(0, -1)],
-                 [complex(0, 1), 0]])
+                 [complex(0, 1), 0]], complex)
 Z = numpy.array([[1, 0],
-                 [0, -1]])
+                 [0, -1]], complex)
+gates = {"H": H, "X": X, "Y": Y, "Z": Z}
 
 
 class Register(object):
@@ -60,6 +61,15 @@ class Register(object):
         return "[" + ", ".join(
             state + ":" + str(states[state] * 100.0) + "%" for state in sorted(states.keys())) + \
                "]"
+
+    def C_matrix(self, U):
+        """
+        Create C(U) matrix for controlled gate
+        :param U: 2x2 matrix of gate operation
+        :return: 4x4 matrix for control gate
+        """
+        C = numpy.array([[I, empty], [empty, U]])
+        return C
 
     def hadamard_gate(self, qbit):
         """
@@ -195,3 +205,5 @@ def execute(program):
         "states": register.counting_states()
     }
     return retval
+
+r = Register()
