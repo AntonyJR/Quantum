@@ -87,7 +87,7 @@ The output json document has the following format
 ## To Do
 * Add support for controlled gate (single qubit control)
 * Refactor to support pre-calculating quantum gate tensor for optimisation of repeated use of same circuit 
-
+* Implement [QASM]
 ## References
 Can1: [Undergraduate computational physics projects on quantum computing][Candela1] : D. Candela :
 American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
@@ -99,3 +99,4 @@ American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
 [mock_extension]: mock_extension.py
 [main_test]: main_test.py
 [QuTiP]: http://qutip.org/
+[QASM]: https://www.quantum-inspire.com/kbase/qasm/
