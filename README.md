@@ -88,7 +88,7 @@ The output json document has the following format
 * Add support for controlled gate (single qubit control)
 * Refactor to support pre-calculating quantum gate tensor for optimisation of repeated use of same circuit 
 * Implement [QASM]
-* Add support for mathematical constants, especially Pi
+* Add support for mathematical and physical constants, especially &pi; and &#8463;.
 ## References
 Can1: [Undergraduate computational physics projects on quantum computing][Candela1] : D. Candela :
 American Journal of Physics 83, 688 (2015); doi: 10.1119/1.4922296
